@@ -11,23 +11,19 @@ import (
 )
 
 //nolint:gochecknoglobals // usage for command.
-var usage = `usage: reltime [options] <time> [time1..timeN]
+var usage = `usage: reltime [options] <time> [compare time]
 
 A simple tool to parse and display time
 `
 
-var versionFlag = flag.Bool("version", false, "Display Version")
-var shortVersionFlag = flag.Bool("v", false, "Display Short Version")
+var versionFlag = flag.Bool("version", false, "Display Version.")
+var shortVersionFlag = flag.Bool("v", false, "Display Short Version.")
 
-// var displayAgeFlag = flag.Bool("age", false, "Display Age")
-
-func init() {
-}
+var displayAgeFlag = flag.String("age", "s", "Display age format [s, h, d, string]. (default:s)")
+var displayAgeAbsFlag = flag.Bool("absolute", false, "Display age as absolute number.")
 
 //nolint:forbidigo // CLI tool output.
 func main() {
-	// var cmd *Command
-
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), usage)
 		flag.PrintDefaults()
@@ -48,51 +44,44 @@ func main() {
 	for _, arg := range args {
 		ts, err := timeparser.Parse(arg)
 		if err != nil {
-			errorAndExit("unable to parse time: %s\n", arg)
+			errorAndExitf("unable to parse time: %s\n", arg)
 		}
 		tslist = append(tslist, ts)
 	}
 
 	if len(tslist) < 1 {
-		usageAndExit("must provide at least one datetime")
+		usageAndExitf("must provide at least one datetime")
 	}
 
+	td := time.Since(tslist[0])
+	if len(tslist) >= 2 { //nolint:gomnd // two times.
+		td = tslist[1].Sub(tslist[0])
+		if *displayAgeAbsFlag {
+			if td < 0 {
+				td = -1 * td
+			}
+		}
+	}
 	switch {
+	case displayAgeFlag != nil:
+		switch strings.ToLower(*displayAgeFlag) {
+		case "string", "str":
+			fmt.Printf("%s", td.String())
+		case "d":
+			fmt.Printf("%.0f", td.Hours()/24) //nolint:gomnd // 24 hours in day
+		case "h":
+			fmt.Printf("%.0f", td.Hours())
+		case "s":
+			fmt.Printf("%.0f", td.Seconds())
+		default:
+			usageAndExitf("invalid age format specified: %s", *displayAgeFlag)
+		}
 	default:
-		fmt.Printf("%.0f", time.Since(tslist[0]).Seconds())
+		fmt.Printf("%.0f", td.Seconds())
 	}
-	// var versionFlag = flag.Bool("version", false, "Display Version")
-
-	// flag.Usage = func() {
-	// 	fmt.Fprint(os.Stderr, fmt.Sprint(usage))
-	// }
-
-	// if len(os.Args) <= 1 {
-	// 	usageAndExit("")
-	// }
-
-	// switch os.Args[1] {
-	// case "--version":
-	// 	cmd = NewVersionCommand()
-	// // case "info":
-	// // 	cmd = NewInfoCommand()
-	// // case "cmp":
-	// // 	cmd = NewCompareCommand()
-	// // case "diff":
-	// // 	cmd = NewDiffCommand()
-	// default:
-	// 	usageAndExit(fmt.Sprintf("%s: '%s' is not a command.\n", os.Args[0], os.Args[1]))
-	// }
-
-	// if err := cmd.Init(os.Args[2:]); err != nil {
-	// 	fmt.Printf("error: command init failed: %s", err)
-	// 	os.Exit(1)
-	// }
-
-	// cmd.Run()
 }
 
-func errorAndExit(format string, args ...interface{}) {
+func errorAndExitf(format string, args ...interface{}) {
 	if format != "" {
 		if !strings.HasSuffix(format, "\n") {
 			format += "\n"
@@ -104,10 +93,13 @@ func errorAndExit(format string, args ...interface{}) {
 	os.Exit(1)
 }
 
-func usageAndExit(msg string) {
-	if msg != "" {
-		fmt.Fprint(os.Stderr, msg)
-		fmt.Fprintf(os.Stderr, "\n")
+func usageAndExitf(format string, args ...interface{}) {
+	if format != "" {
+		if !strings.HasSuffix(format, "\n") {
+			format += "\n"
+		}
+		format = "error: " + format
+		fmt.Fprintf(os.Stderr, format, args...)
 	}
 
 	flag.Usage()
@@ -116,9 +108,10 @@ func usageAndExit(msg string) {
 
 func versionAndExit(short bool) {
 	if short {
-		fmt.Printf("%s", version)
+		fmt.Fprintf(os.Stdout, "%s", version)
 	} else {
-		fmt.Printf("%s [%s] (%s) <%s>", version, commit, date, builtBy)
+		fmt.Fprintf(os.Stdout, "%s [%s] (%s) <%s>", version, commit, date, builtBy)
 	}
+
 	os.Exit(0)
 }
