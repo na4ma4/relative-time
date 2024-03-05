@@ -9,10 +9,14 @@ var (
 	ErrTimeNotParsed = errors.New("unable to parse time")
 )
 
-var (
+const (
+	// Replicated time format
+	//
+	// The time format used by Replicated.
 	Replicated = "2006-01-02 15:04:05.999999999 -0700 MST"
 )
 
+//nolint:gochecknoglobals // slice and struct constants.
 var (
 	timeFormats = []string{
 		time.RFC1123,

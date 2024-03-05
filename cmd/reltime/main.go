@@ -10,7 +10,6 @@ import (
 	"github.com/na4ma4/relative-time/timeparser"
 )
 
-//nolint:gochecknoglobals // usage for command.
 var usage = `usage: reltime [options] <time> [compare time]
 
 A simple tool to parse and display time

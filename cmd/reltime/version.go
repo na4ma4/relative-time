@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-//nolint:gochecknoglobals,unused // these have to be variables for the linker to change the values
+//nolint:unused // these have to be variables for the linker to change the values
 var (
 	version = "dev"
 	date    = "notset"
@@ -16,7 +16,6 @@ var (
 	short   bool
 )
 
-//nolint:gochecknoglobals // usage for version command.
 var versionUsage = `Print the app version and build info for the current context.
 
 Usage: prontohex version [options]
@@ -25,8 +24,8 @@ Options:
   --short  If true, print just the version number. Default false.
 `
 
-//nolint:forbidigo,gochecknoglobals // CLI tool output.
-var versionFunc = func(cmd *Command, args []string) {
+//nolint:forbidigo // formatted output.
+var versionFunc = func(_ *Command, _ []string) {
 	if short {
 		fmt.Printf("%s", version)
 	} else {
