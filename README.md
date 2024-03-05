@@ -1,5 +1,7 @@
 # relative-time
 
+[![CI](https://github.com/na4ma4/relative-time/actions/workflows/ci.yml/badge.svg)](https://github.com/na4ma4/relative-time/actions/workflows/ci.yml)
+
 Relative time operations
 
 ## Usage
