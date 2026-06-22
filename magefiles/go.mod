@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.22.0
 
 require (
-	github.com/magefile/mage v1.15.0
+	github.com/magefile/mage v1.17.2
 	github.com/na4ma4/mage v0.0.0-20240305020752-9a036db0b6bf
 )
 
