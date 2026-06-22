@@ -5,9 +5,7 @@ import (
 	"time"
 )
 
-var (
-	ErrTimeNotParsed = errors.New("unable to parse time")
-)
+var ErrTimeNotParsed = errors.New("unable to parse time")
 
 const (
 	// Replicated time format

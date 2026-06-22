@@ -1,9 +1,11 @@
+version: 2
+
 env:
   - CGO_ENABLED=0
 
 before:
   hooks:
-    - make test
+    - mage test
     - go generate ./...
     - go mod tidy
     - go mod download
@@ -12,6 +14,18 @@ builds:
   - id: reltime
     main: ./cmd/reltime
     binary: reltime
+    ldflags:
+      - "-X github.com/dosquad/go-cliversion.BuildDate={{ .Date }}"
+      - "-X github.com/dosquad/go-cliversion.BuildDebug=false"
+      - "-X github.com/dosquad/go-cliversion.BuildMethod=goreleaser"
+      - "-X github.com/dosquad/go-cliversion.BuildVersion={{.Version}}"
+      - "-X github.com/dosquad/go-cliversion.GitCommit={{.ShortCommit}}"
+      - "-X github.com/dosquad/go-cliversion.GitRepo=https://github.com/na4ma4/relative-time"
+      - "-X github.com/dosquad/go-cliversion.GitSlug=na4ma4/relative-time"
+      - "-X github.com/dosquad/go-cliversion.GitTag={{.Version}}"
+      - "-X github.com/dosquad/go-cliversion.GitExactTag={{.RawVersion}}"
+      - "-s"
+      - "-w"
     flags:
       - -tags=release
       - -buildmode=default
@@ -35,7 +49,7 @@ checksum:
   name_template: 'checksums.txt'
 
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  version_template: "{{ .Tag }}-next"
 
 changelog:
   sort: asc
@@ -44,19 +58,15 @@ changelog:
       - '^docs:'
       - '^test:'
 
-brews:
-  -
-    name: reltime
-    tap:
+homebrew_casks:
+  - name: reltime
+    repository:
       owner: na4ma4
       name: homebrew-tap
     commit_author:
       name: goreleaserbot
       email: na4ma4@users.noreply.github.com
-    folder: Formula
+    directory: Casks
     homepage: https://github.com/na4ma4/relative-time
     description: Relative time check tool
-    test: |
-      system "#{bin}/reltime --version"
-    install: |
-      bin.install "reltime"
+

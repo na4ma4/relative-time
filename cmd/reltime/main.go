@@ -15,15 +15,19 @@ var usage = `usage: reltime [options] <time> [compare time]
 A simple tool to parse and display time
 `
 
-var versionFlag = flag.Bool("version", false, "Display Version.")
-var shortVersionFlag = flag.Bool("v", false, "Display Short Version.")
+var (
+	versionFlag      = flag.Bool("version", false, "Display Version.")
+	shortVersionFlag = flag.Bool("v", false, "Display Short Version.")
+)
 
-var displayAgeFlag = flag.String("age", "s", "Display age format [s, h, d, string]. (default:s)")
-var displayAgeAbsFlag = flag.Bool("absolute", false, "Display age as absolute number.")
+var (
+	displayAgeFlag    = flag.String("age", "s", "Display age format [s, h, d, string]. (default:s)")
+	displayAgeAbsFlag = flag.Bool("absolute", false, "Display age as absolute number.")
+)
 
 //nolint:forbidigo // CLI tool output.
 func main() {
-	flag.Usage = func() {
+	flag.Usage = func() { //nolint:reassign // it's in the official docs.
 		fmt.Fprint(flag.CommandLine.Output(), usage)
 		flag.PrintDefaults()
 	}
@@ -39,7 +43,7 @@ func main() {
 
 	args := flag.Args()
 
-	tslist := []time.Time{}
+	tslist := make([]time.Time, 0, len(args))
 	for _, arg := range args {
 		ts, err := timeparser.Parse(arg)
 		if err != nil {
@@ -53,7 +57,7 @@ func main() {
 	}
 
 	td := time.Since(tslist[0])
-	if len(tslist) >= 2 { //nolint:gomnd // two times.
+	if len(tslist) >= 2 { //nolint:mnd // two times.
 		td = tslist[1].Sub(tslist[0])
 		if *displayAgeAbsFlag {
 			if td < 0 {
@@ -67,7 +71,7 @@ func main() {
 		case "string", "str":
 			fmt.Printf("%s", td.String())
 		case "d":
-			fmt.Printf("%.0f", td.Hours()/24) //nolint:gomnd // 24 hours in day
+			fmt.Printf("%.0f", td.Hours()/24) //nolint:mnd // 24 hours in day
 		case "h":
 			fmt.Printf("%.0f", td.Hours())
 		case "s":
@@ -80,7 +84,7 @@ func main() {
 	}
 }
 
-func errorAndExitf(format string, args ...interface{}) {
+func errorAndExitf(format string, args ...any) {
 	if format != "" {
 		if !strings.HasSuffix(format, "\n") {
 			format += "\n"
@@ -92,7 +96,7 @@ func errorAndExitf(format string, args ...interface{}) {
 	os.Exit(1)
 }
 
-func usageAndExitf(format string, args ...interface{}) {
+func usageAndExitf(format string, args ...any) {
 	if format != "" {
 		if !strings.HasSuffix(format, "\n") {
 			format += "\n"
